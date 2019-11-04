@@ -7,42 +7,24 @@
   <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
-  <div id="hider">
-    <div id="fitter">
-      <div id="wrapper">
-        <video onloadedmetadata="onPlay(this)" id="inputVideo" autoplay muted playsinline></video>
-        <canvas id="overlay" />
-      </div>
-    </div>
+  <video onloadedmetadata="onPlay(this)" id="inputVideo" autoplay muted playsinline></video>
+  <div id="center">
+    <canvas id="overlay" width="480" height="480" />
   </div>
 </body>
 
   <script>
-    let withBoxes = false
     const videoEl = document.getElementById('inputVideo')
-    const options = new faceapi.TinyFaceDetectorOptions({ inputSize: 224, scoreThreshold: 0.5 })
+    const options = new faceapi.TinyFaceDetectorOptions({ inputSize: 256, scoreThreshold: 0 })
     const canvas = document.getElementById('overlay')
+    const ctx = canvas.getContext('2d')
 
     async function onPlay() {
       if(videoEl.paused || videoEl.ended || !(!!faceapi.nets.tinyFaceDetector.params))
         return setTimeout(() => onPlay())
 
       const result = await faceapi.detectSingleFace(videoEl, options).withFaceLandmarks()
-
-      if (result) {
-
-        const dims = faceapi.matchDimensions(canvas, videoEl, true)
-        const resizedResult = faceapi.resizeResults(result, dims)
-
-        if (withBoxes) {
-          faceapi.draw.drawDetections(canvas, resizedResult)
-        }
-        faceapi.draw.drawFaceLandmarks(canvas, resizedResult)
-
-        draw(result, dims)
-        
-      }
-
+      draw(result, videoEl, canvas, ctx) 
       setTimeout(() => onPlay())
     }
 
@@ -57,9 +39,7 @@
       videoEl.srcObject = stream
     }
 
-    async function initFaceDetectionControls() {
-      await faceapi.nets.tinyFaceDetector.load('/weights/')
-    }
+
 
     function ready(fn) {
       if (document.readyState != 'loading'){
@@ -70,7 +50,7 @@
     }
 
     ready(()=>{
-      initFaceDetectionControls()
+      faceapi.nets.tinyFaceDetector.load('/weights/')
       run()
     })
   </script>

@@ -1,4 +1,7 @@
-function draw(result, dims) {
+function draw(result, videoEl, canvas, ctx) {
+	if (!result) return
+	let canvasSize = 380
+
 	let all = [...result.landmarks.positions]
 	let mouth = result.landmarks.positions.splice(48, 68)
 	let rEye = result.landmarks.positions.splice(42, 48)
@@ -10,55 +13,70 @@ function draw(result, dims) {
 	let eyebrows = lEyebrow.concat(rEyebrow)
 	let eyes = lEye.concat(rEye)
 
-	let highestPoint = Math.min(...eyebrows.map((el) => el.y))
-	let lowestPoint = Math.max(...jaw.map((el) => el.y))
-	let leftPoint = Math.min(...all.map((el) => el.x))
-	let rightPoint = Math.max(...all.map((el) => el.x))
-
-	let maxCircleRadius = Math.max(lowestPoint - highestPoint, rightPoint - leftPoint)
+	//BR : Before Rotation
+	let highestPointBR = Math.min(...all.map((el) => el.y))
+	let lowestPointBR = Math.max(...all.map((el) => el.y))
+	let leftPointBR = Math.min(...all.map((el) => el.x))
+	let rightPointBR = Math.max(...all.map((el) => el.x))
 
 	let rotationAngle = 180 - calcAngleDegrees(jaw[0].x - jaw[16].x, jaw[0].y - jaw[16].y)
-	rotationAngle = rotationAngle < 180 ? rotationAngle + 360 : rotationAngle
+	let rotateOrigin = [(leftPointBR + rightPointBR) / 2, (highestPointBR + lowestPointBR) / 2]
 
-	document.getElementById('wrapper').style.cssText = styleFactory({
-		transform: `rotate(${rotationAngle}deg)`,
-		'transform-origin': `${(leftPoint + rightPoint) / 2}px ${(highestPoint + lowestPoint) / 2}px`
+	let rotatedPoints = all.map((point) => {
+		let rotatedPoints = rotate(rotateOrigin[0], videoEl.height - rotateOrigin[1], point.x, point.y, -rotationAngle)
+		return {
+			x: rotatedPoints[0],
+			y: rotatedPoints[1]
+		}
 	})
 
-	/*
-	document.getElementById('highPoint').style.cssText = styleFactory({
-		top: `${Math.round(highestPoint)}px`
+	let highestPoint = Math.min(...rotatedPoints.map((el) => el.y))
+	let lowestPoint = Math.max(...rotatedPoints.map((el) => el.y))
+	let leftPoint = Math.min(...rotatedPoints.map((el) => el.x))
+	let rightPoint = Math.max(...rotatedPoints.map((el) => el.x))
+
+	// check if rotated correctly. If close to zero, it rotated correctly.
+	//console.log(Math.abs(rotatedPoints[0].y - rotatedPoints[16].y))
+
+	let trimmedPoints = rotatedPoints.map((point) => {
+		return {
+			x: point.x - leftPoint,
+			y: point.y - highestPoint
+		}
 	})
 
-	document.getElementById('lowPoint').style.cssText = styleFactory({
-		top: `${Math.round(lowestPoint)}px`
+	// check if how close the face is to camera
+	//console.log(trimmedAll[16].x - trimmedAll[0].x)
+
+	let scaleFactor = canvasSize / (Math.max(rightPoint - leftPoint, highestPoint - lowestPoint) + 25)
+
+	let scaledPoints = trimmedPoints.map((point) => {
+		return {
+			x: point.x * scaleFactor + 70,
+			y: point.y * scaleFactor + 50
+		}
 	})
 
-	document.getElementById('leftPoint').style.cssText = styleFactory({
-		left: `${Math.round(leftPoint)}px`
+	ctx.clearRect(0, 0, canvas.width, canvas.height)
+	ctx.beginPath()
+	ctx.moveTo(scaledPoints[0].x, scaledPoints[0].y)
+	let stopArr = [17, 22, 27, 36, 42, 48, 55, 60, 68]
+	let afterStopArr = [16, 17, 22, 30, 36, 42, 55, 48, 60]
+
+	scaledPoints.concat({ x: scaledPoints[67].x, y: scaledPoints[67].y }).forEach((point, i) => {
+		if (stopArr.includes(i)) {
+			ctx.lineTo(
+				Math.round(scaledPoints[afterStopArr[stopArr.findIndex((e) => e === i)]].x),
+				Math.round(scaledPoints[afterStopArr[stopArr.findIndex((e) => e === i)]].y)
+			)
+			ctx.strokeStyle = '#72B01D'
+			ctx.stroke()
+			ctx.beginPath()
+			ctx.moveTo(Math.round(point.x), Math.round(point.y))
+		}
+		ctx.lineTo(Math.round(point.x), Math.round(point.y))
 	})
 
-	document.getElementById('rightPoint').style.cssText = styleFactory({
-		left: `${Math.round(rightPoint)}px`
-	})
-  */
-
-	document.getElementById('fitter').style.cssText = styleFactory({
-		top: `${-((highestPoint + lowestPoint) / 2) + maxCircleRadius / 1.5}px`,
-		left: `${-((leftPoint + rightPoint) / 2) + maxCircleRadius / 1.5}px`
-	})
-
-	document.getElementById('hider').style.cssText = styleFactory({
-		width: `${(maxCircleRadius * 4) / 3}px`,
-		height: `${(maxCircleRadius * 4) / 3}px`,
-		transform: `scale(${250 / (maxCircleRadius / 1.5)})`
-	})
-
-	/*
-	document.getElementById('inputVideo').style.cssText = styleFactory({
-		'clip-path': `circle(${maxCircleRadius / 1.6}px at ${(leftPoint + rightPoint) / 2}px ${(highestPoint +
-			lowestPoint) /
-			2}px)`
-  })
-  */
+	ctx.strokeStyle = '#72B01D'
+	ctx.stroke()
 }
