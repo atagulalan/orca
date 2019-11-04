@@ -30,7 +30,7 @@
 
     async function run() {
       // load face detection and face landmark models
-      await faceapi.loadFaceLandmarkModel('/weights/')
+      await faceapi.loadFaceLandmarkModel('./weights/')
 
       // try to access users webcam and stream the images
       // to the video element
@@ -50,7 +50,7 @@
     }
 
     ready(()=>{
-      faceapi.nets.tinyFaceDetector.load('/weights/')
+      faceapi.nets.tinyFaceDetector.load('./weights/')
       run()
     })
   </script>
