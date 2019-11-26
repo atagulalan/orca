@@ -4,9 +4,25 @@
   <script src="js/face-api.js"></script>
   <script src="js/functions.js"></script>
   <script src="js/main.js"></script>
+  <script src="js/Chart.js"></script>
+  <script src="js/chartInit.js"></script>
   <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
+  <div class="chartWrapper">
+    <canvas id="myChart1" width="200" height="160" style="display: block;"> </canvas>
+    <canvas id="myChart1Intersection" width="230" height="160" style="display: block;margin-top:-160px;"> </canvas>
+    <canvas id="myChart2" width="200" height="160" style="display: block;"> </canvas>
+    <canvas id="myChart2Intersection" width="230" height="160" style="display: block;margin-top:-160px;"> </canvas>
+    <canvas id="myChart3" width="200" height="160" style="display: block;"> </canvas>
+    <canvas id="myChart3Intersection" width="230" height="160" style="display: block;margin-top:-160px;"> </canvas>
+    <canvas id="myChart4" width="200" height="160" style="display: block;"> </canvas>
+    <canvas id="myChart4Intersection" width="230" height="160" style="display: block;margin-top:-160px;"> </canvas>
+    <canvas id="myChart5" width="200" height="160" style="display: block;"> </canvas>
+    <canvas id="myChart5Intersection" width="230" height="160" style="display: block;margin-top:-160px;"> </canvas>
+    <canvas id="myChart6" width="200" height="160" style="display: block;"> </canvas>
+    <canvas id="myChart6Intersection" width="230" height="160" style="display: block;margin-top:-160px;"> </canvas>
+  </div>
   <video onloadedmetadata="onPlay(this)" id="inputVideo" autoplay muted playsinline></video>
   <div id="center">
     <canvas id="overlay" width="480" height="480" />
@@ -17,7 +33,12 @@
     const videoEl = document.getElementById('inputVideo')
     const options = new faceapi.TinyFaceDetectorOptions({ inputSize: 256, scoreThreshold: 0 })
     const canvas = document.getElementById('overlay')
-    const ctx = canvas.getContext('2d')
+    const ctx = canvas.getContext('2d') 
+    let charts = [1, 2, 3, 4, 5, 6].map((i) => {
+      return createChart(`myChart${i}`, `myChart${i}Intersection`, `A${i}`, () => {
+        return [trapmf([0, 0, 40, 90]), trimf([48, 90, 112]), trapmf([90, 150, 180, 180])]
+      })
+    })
 
     async function onPlay() {
       if(videoEl.paused || videoEl.ended || !(!!faceapi.nets.tinyFaceDetector.params))

@@ -241,4 +241,11 @@ function draw(result, videoEl, canvas, ctx) {
 	]
 
 	A6 = averageOf(A6m)
+
+	pinPoint(1, A1)
+	pinPoint(2, A2)
+	pinPoint(3, A3)
+	pinPoint(4, A4)
+	pinPoint(5, A5)
+	pinPoint(6, A6)
 }

@@ -9,6 +9,20 @@ html, body{
   background:#0D0A0B;
 }
 
+.chartWrapper {
+  height: 100vh;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  min-height: 960px;
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 300px;
+  padding-left:30px;
+}
+
 #center{
   position:relative;
   overflow:hidden;
@@ -16,7 +30,7 @@ html, body{
   min-height:480px;
 }
 
-canvas, video{
+.overlay, video{
   position:absolute;
   left:0;
   top:0;
