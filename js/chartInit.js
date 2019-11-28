@@ -21,15 +21,21 @@ var colors = [
 
 let rulebase = {
 	HAPPY: [
-		{ a0: 'MEDIUM', a1: 'LARGE', a2: 'LARGE', a3: 'LARGE', a4: 'LARGE', a5: 'MEDIUM' },
-		{ a0: 'SMALL', a1: 'LARGE', a2: 'LARGE', a3: 'LARGE', a4: 'LARGE', a5: 'LARGE' }
+		{ a0: 'SMALL', a1: 'MEDIUM', a2: 'MEDIUM', a3: 'MEDIUM', a4: 'LARGE', a5: 'LARGE' },
+		{ a0: 'SMALL', a1: 'MEDIUM', a2: 'LARGE', a3: 'LARGE', a4: 'LARGE', a5: 'LARGE' }
 	],
-	SAD: [{ a0: 'LARGE', a1: 'LARGE', a2: 'LARGE', a3: 'LARGE', a4: 'LARGE', a5: 'LARGE' }],
-	NEUTRAL: [{ a0: 'MEDIUM', a1: 'LARGE', a2: 'LARGE', a3: 'LARGE', a4: 'LARGE', a5: 'LARGE' }],
+	SAD: [
+		{ a0: 'MEDIUM', a1: 'MEDIUM', a2: 'LARGE', a3: 'MEDIUM', a4: 'LARGE', a5: 'MEDIUM' },
+		{ a0: 'LARGE', a1: 'MEDIUM', a2: 'LARGE', a3: 'MEDIUM', a4: 'LARGE', a5: 'MEDIUM' }
+	],
+	NEUTRAL: [
+		{ a0: 'MEDIUM', a1: 'MEDIUM', a2: 'MEDIUM', a3: 'MEDIUM', a4: 'LARGE', a5: 'LARGE' },
+		{ a0: 'MEDIUM', a1: 'SMALL', a2: 'MEDIUM', a3: 'MEDIUM', a4: 'LARGE', a5: 'LARGE' }
+	],
 	SCARED: [
 		{ a0: 'LARGE', a1: 'LARGE', a2: 'LARGE', a3: 'LARGE', a4: 'MEDIUM', a5: 'SMALL' },
-		{ a0: 'LARGE', a1: 'LARGE', a2: 'LARGE', a3: 'LARGE', a4: 'MEDIUM', a5: 'MEDIUM' }
-	]
+		{ a0: 'MEDIUM', a1: 'MEDIUM', a2: 'LARGE', a3: 'LARGE', a4: 'MEDIUM', a5: 'MEDIUM' }
+	]]
 }
 
 var xPrecision = 180
@@ -212,6 +218,10 @@ function getCurrentFuzzyCluster() {
 	return k
 }
 
+function printEmotionCluster() {
+	console.log(JSON.stringify(getCurrentFuzzyCluster()))
+}
+
 function createChart(cId, iId, title, runMemberships) {
 	// Definning X
 	var ordersChartData = {
@@ -292,6 +302,11 @@ function createChart(cId, iId, title, runMemberships) {
 	return { myChart, MFS, ordersChartData, iId, cId }
 }
 
+var minArr = [Infinity, Infinity, Infinity, Infinity, Infinity, Infinity, Infinity]
+var maxArr = [0, 0, 0, 0, 0, 0, 0]
+
 function pinPoint(i, x) {
+	minArr[i] = x < minArr[i] ? x : minArr[i]
+	maxArr[i] = x > maxArr[i] ? x : maxArr[i]
 	drawIntersection(x, `A${i}`, charts[i - 1].MFS, charts[i - 1].ordersChartData, charts[i - 1].myChart)
 }

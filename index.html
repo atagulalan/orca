@@ -45,7 +45,7 @@
   <div id="center">
     <canvas id="overlay" width="480" height="480" />
   </div>
-  <div id="emotion"></div>
+  <div id="emotion" onClick="printEmotionCluster()"></div>
 </body>
 
   <script>
@@ -53,9 +53,11 @@
     const options = new faceapi.TinyFaceDetectorOptions({ inputSize: 256, scoreThreshold: 0 })
     const canvas = document.getElementById('overlay')
     const ctx = canvas.getContext('2d') 
-    let charts = [1, 2, 3, 4, 5, 6].map((i) => {
-      return createChart(`A${i}`, `A${i}Intersection`, `A${i}`, () => {
-        return [trapmf([0, 0, 40, 90]), trimf([48, 90, 112]), trapmf([90, 150, 180, 180])]
+    let charts = [[38,136],[128,152],[90,148],[138,150],[70,156],[54,128]].map((i, idx) => {
+      let min = i[0];
+      let max = i[1];
+      return createChart(`A${idx+1}`, `A${i}Intersection`, `A${idx+1}`, () => {
+        return [trapmf([0, 0, min, ((max+min)/2)]), trimf([min, (min+max)/2, max]), trapmf([(max+min)/2, max, 180, 180])]
       })
     })
 
