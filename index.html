@@ -9,19 +9,37 @@
   <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
-  <div class="chartWrapper">
-    <canvas id="myChart1" width="200" height="160" style="display: block;"> </canvas>
-    <canvas id="myChart1Intersection" width="230" height="160" style="display: block;margin-top:-160px;"> </canvas>
-    <canvas id="myChart2" width="200" height="160" style="display: block;"> </canvas>
-    <canvas id="myChart2Intersection" width="230" height="160" style="display: block;margin-top:-160px;"> </canvas>
-    <canvas id="myChart3" width="200" height="160" style="display: block;"> </canvas>
-    <canvas id="myChart3Intersection" width="230" height="160" style="display: block;margin-top:-160px;"> </canvas>
-    <canvas id="myChart4" width="200" height="160" style="display: block;"> </canvas>
-    <canvas id="myChart4Intersection" width="230" height="160" style="display: block;margin-top:-160px;"> </canvas>
-    <canvas id="myChart5" width="200" height="160" style="display: block;"> </canvas>
-    <canvas id="myChart5Intersection" width="230" height="160" style="display: block;margin-top:-160px;"> </canvas>
-    <canvas id="myChart6" width="200" height="160" style="display: block;"> </canvas>
-    <canvas id="myChart6Intersection" width="230" height="160" style="display: block;margin-top:-160px;"> </canvas>
+  <div class="chartWrapper" id="chartWrapper">
+    <div class="singleChartWrapper">
+      <canvas id="A1" width="200" height="160" style="display: block;"></canvas>
+      <canvas id="A1Intersection" width="230" height="160" style="display: block;margin-top:-160px;"></canvas>
+      <div id="A1Text" class="text">active</div>
+    </div>
+    <div class="singleChartWrapper">
+      <canvas id="A2" width="200" height="160" style="display: block;"></canvas>
+      <canvas id="A2Intersection" width="230" height="160" style="display: block;margin-top:-160px;"></canvas>
+      <div id="A2Text" class="text">active</div>
+    </div>
+    <div class="singleChartWrapper">
+      <canvas id="A3" width="200" height="160" style="display: block;"></canvas>
+      <canvas id="A3Intersection" width="230" height="160" style="display: block;margin-top:-160px;"></canvas>
+      <div id="A3Text" class="text">active</div>
+    </div>
+    <div class="singleChartWrapper">
+      <canvas id="A4" width="200" height="160" style="display: block;"></canvas>
+      <canvas id="A4Intersection" width="230" height="160" style="display: block;margin-top:-160px;"></canvas>
+      <div id="A4Text" class="text">active</div>
+    </div>
+    <div class="singleChartWrapper">
+      <canvas id="A5" width="200" height="160" style="display: block;"></canvas>
+      <canvas id="A5Intersection" width="230" height="160" style="display: block;margin-top:-160px;"></canvas>
+      <div id="A5Text" class="text">active</div>
+    </div>
+    <div class="singleChartWrapper">
+      <canvas id="A6" width="200" height="160" style="display: block;"></canvas>
+      <canvas id="A6Intersection" width="230" height="160" style="display: block;margin-top:-160px;"></canvas>
+      <div id="A6Text" class="text">active</div>
+    </div>
   </div>
   <video onloadedmetadata="onPlay(this)" id="inputVideo" autoplay muted playsinline></video>
   <div id="center">
@@ -35,7 +53,7 @@
     const canvas = document.getElementById('overlay')
     const ctx = canvas.getContext('2d') 
     let charts = [1, 2, 3, 4, 5, 6].map((i) => {
-      return createChart(`myChart${i}`, `myChart${i}Intersection`, `A${i}`, () => {
+      return createChart(`A${i}`, `A${i}Intersection`, `A${i}`, () => {
         return [trapmf([0, 0, 40, 90]), trimf([48, 90, 112]), trapmf([90, 150, 180, 180])]
       })
     })
@@ -45,6 +63,8 @@
         return setTimeout(() => onPlay())
 
       const result = await faceapi.detectSingleFace(videoEl, options).withFaceLandmarks()
+
+      document.getElementById("chartWrapper").className = "chartWrapper active"
       draw(result, videoEl, canvas, ctx) 
       setTimeout(() => onPlay())
     }
