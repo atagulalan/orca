@@ -65,3 +65,13 @@ video {
 video {
   opacity: 0;
 }
+
+#emotion{
+  font-size: 32pt;
+  color: #69A21C;
+  background: transparent;
+  border: none;
+  font-family: 'Fira Code', consolas;
+  position: absolute;
+  margin-top: 250px;
+}

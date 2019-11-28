@@ -248,4 +248,6 @@ function draw(result, videoEl, canvas, ctx) {
 	pinPoint(4, A4)
 	pinPoint(5, A5)
 	pinPoint(6, A6)
+
+	checkEmotion()
 }

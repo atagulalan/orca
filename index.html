@@ -45,6 +45,7 @@
   <div id="center">
     <canvas id="overlay" width="480" height="480" />
   </div>
+  <div id="emotion"></div>
 </body>
 
   <script>
@@ -79,8 +80,6 @@
       const videoEl = document.getElementById('inputVideo')
       videoEl.srcObject = stream
     }
-
-
 
     function ready(fn) {
       if (document.readyState != 'loading'){
