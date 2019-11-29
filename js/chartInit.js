@@ -1,42 +1,23 @@
 var colors = [
-	'#8BC34A',
-	'#7CB342',
-	'#689F38',
-	'#80CBC4',
-	'#26A69A',
-	'#00897B',
-	'#B2FF59',
-	'#C6FF00',
-	'#AEEA00',
-	'#64FFDA',
-	'#1DE9B6',
-	'#00BFA5',
-	'#66BB6A',
-	'#43A047',
-	'#2E7D32',
-	'#69F0AE',
-	'#00E676',
-	'#00C853'
+	'#02a202',
+	'#f7e201',
+	'#f71745',
+	'#02a202',
+	'#f7e201',
+	'#f71745',
+	'#02a202',
+	'#f7e201',
+	'#f71745',
+	'#02a202',
+	'#f7e201',
+	'#f71745',
+	'#02a202',
+	'#f7e201',
+	'#f71745',
+	'#02a202',
+	'#f7e201',
+	'#f71745'
 ]
-
-let rulebase = {
-	HAPPY: [
-		{ a0: 'SMALL', a1: 'MEDIUM', a2: 'MEDIUM', a3: 'MEDIUM', a4: 'LARGE', a5: 'LARGE' },
-		{ a0: 'SMALL', a1: 'MEDIUM', a2: 'LARGE', a3: 'LARGE', a4: 'LARGE', a5: 'LARGE' }
-	],
-	SAD: [
-		{ a0: 'MEDIUM', a1: 'MEDIUM', a2: 'LARGE', a3: 'MEDIUM', a4: 'LARGE', a5: 'MEDIUM' },
-		{ a0: 'LARGE', a1: 'MEDIUM', a2: 'LARGE', a3: 'MEDIUM', a4: 'LARGE', a5: 'MEDIUM' }
-	],
-	NEUTRAL: [
-		{ a0: 'MEDIUM', a1: 'MEDIUM', a2: 'MEDIUM', a3: 'MEDIUM', a4: 'LARGE', a5: 'LARGE' },
-		{ a0: 'MEDIUM', a1: 'SMALL', a2: 'MEDIUM', a3: 'MEDIUM', a4: 'LARGE', a5: 'LARGE' }
-	],
-	SCARED: [
-		{ a0: 'LARGE', a1: 'LARGE', a2: 'LARGE', a3: 'LARGE', a4: 'MEDIUM', a5: 'SMALL' },
-		{ a0: 'MEDIUM', a1: 'MEDIUM', a2: 'LARGE', a3: 'LARGE', a4: 'MEDIUM', a5: 'MEDIUM' }
-	]]
-}
 
 var xPrecision = 180
 
@@ -72,10 +53,6 @@ function trapmf(arr) {
 		mx[i] = (i - arr[3]) * (1 / (arr[2] - arr[3]))
 	}
 	return mx
-}
-
-function strimf(center, width) {
-	trimf([center - width / 2, center, center + width / 2])
 }
 
 function findIntersects(runIndex, line) {
@@ -127,15 +104,14 @@ function convertArrayToObject(array) {
 	}, initialValue)
 }
 
-let zart = {}
+let IntersectionDatabase = {}
 
 function drawIntersection(runIndex, tId, MFS, ordersChartData, chartInstance) {
 	var canvas = document.getElementById(tId + 'Intersection')
 	var context = canvas.getContext('2d')
 	context.clearRect(0, 0, canvas.width, canvas.height)
 
-	zart[tId] = {}
-
+	IntersectionDatabase[tId] = {}
 	Object.keys(MFS).forEach(function(k, i) {
 		var intersects = findIntersects(runIndex, MFS[k])
 
@@ -167,59 +143,11 @@ function drawIntersection(runIndex, tId, MFS, ordersChartData, chartInstance) {
 				result.x * xScale + zeroPointX + 10,
 				2 + (Y.end - Y.start) - result.y * yScale - (Y.end - Y.start - zeroPointY)
 			)
-			zart[tId][k] = parseFloat(result.y).toPrecision(4)
+			IntersectionDatabase[tId][k] = parseFloat(result.y).toPrecision(4)
 		})
 	})
 
-	if (Object.keys(zart[tId]).length > 0) {
-		let s = Object.keys(zart[tId]).reduce((a, b) => (zart[tId][a] > zart[tId][b] ? a : b))
-		textify(tId, s)
-	}
-}
-
-function textify(tId, point) {
-	let TEXTS = {
-		μ0: 'SMALL',
-		μ1: 'MEDIUM',
-		μ2: 'LARGE'
-	}
-	document.getElementById(tId + 'Text').innerHTML = TEXTS[point]
-}
-
-function checkEmotion() {
-	let convertedRuleBase = []
-	Object.keys(rulebase).forEach((key) => {
-		rulebase[key].forEach((obj) => {
-			convertedRuleBase.push({ emotion: key, ...obj })
-		})
-	})
-
-	let now = getCurrentFuzzyCluster()
-
-	convertedRuleBase.forEach((old) => {
-		if (
-			old.a0 === now.a0 &&
-			old.a1 === now.a1 &&
-			old.a2 === now.a2 &&
-			old.a3 === now.a3 &&
-			old.a4 === now.a4 &&
-			old.a5 === now.a5
-		) {
-			document.getElementById('emotion').innerHTML = old.emotion
-		}
-	})
-}
-
-function getCurrentFuzzyCluster() {
-	let k = {}
-	for (let i = 0; i < 6; i++) {
-		k['a' + i] = document.getElementById('A' + (i + 1) + 'Text').innerHTML
-	}
-	return k
-}
-
-function printEmotionCluster() {
-	console.log(JSON.stringify(getCurrentFuzzyCluster()))
+	document.getElementById(tId + 'Text').innerHTML = textify(getMax(tId))
 }
 
 function createChart(cId, iId, title, runMemberships) {
@@ -302,11 +230,6 @@ function createChart(cId, iId, title, runMemberships) {
 	return { myChart, MFS, ordersChartData, iId, cId }
 }
 
-var minArr = [Infinity, Infinity, Infinity, Infinity, Infinity, Infinity, Infinity]
-var maxArr = [0, 0, 0, 0, 0, 0, 0]
-
 function pinPoint(i, x) {
-	minArr[i] = x < minArr[i] ? x : minArr[i]
-	maxArr[i] = x > maxArr[i] ? x : maxArr[i]
 	drawIntersection(x, `A${i}`, charts[i - 1].MFS, charts[i - 1].ordersChartData, charts[i - 1].myChart)
 }

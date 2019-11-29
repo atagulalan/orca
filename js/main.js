@@ -71,13 +71,13 @@ function draw(result, videoEl, canvas, ctx) {
 	ctx.strokeStyle = '#72B01D'
 	ctx.stroke()
 
-	//                   _   _
-	//                  (_) | |
+	//                       _
+	//                      | |
 	//     __ _    ___   _  | |   __ _   _ __
 	//    / _` |  / __| | | | |  / _` | | '__|
 	//   | (_| | | (__  | | | | | (_| | | |
-	//    \__,_|  \___| |_| |_|  \__,_| |_|
-	//
+	//    \__,_|  \_  | |_| |_|  \__,_| |_|
+	//             \_\
 	//
 
 	var eyeDots = [
@@ -242,6 +242,7 @@ function draw(result, videoEl, canvas, ctx) {
 
 	A6 = averageOf(A6m)
 
+	// Show intersection points on the chart
 	pinPoint(1, A1)
 	pinPoint(2, A2)
 	pinPoint(3, A3)
@@ -249,5 +250,82 @@ function draw(result, videoEl, canvas, ctx) {
 	pinPoint(5, A5)
 	pinPoint(6, A6)
 
+	// Check current emotion using rulebase
 	checkEmotion()
+}
+
+let rulebase = {
+	HAPPY: [
+		{ a0: 'SMALL', a1: 'MEDIUM', a2: 'MEDIUM', a3: 'MEDIUM', a4: 'LARGE', a5: 'LARGE' },
+		{ a0: 'SMALL', a1: 'MEDIUM', a2: 'LARGE', a3: 'LARGE', a4: 'LARGE', a5: 'LARGE' }
+	],
+	SAD: [
+		{ a0: 'MEDIUM', a1: 'MEDIUM', a2: 'LARGE', a3: 'MEDIUM', a4: 'LARGE', a5: 'MEDIUM' },
+		{ a0: 'LARGE', a1: 'MEDIUM', a2: 'LARGE', a3: 'MEDIUM', a4: 'LARGE', a5: 'MEDIUM' }
+	],
+	NEUTRAL: [
+		{ a0: 'MEDIUM', a1: 'MEDIUM', a2: 'MEDIUM', a3: 'MEDIUM', a4: 'LARGE', a5: 'LARGE' },
+		{ a0: 'MEDIUM', a1: 'SMALL', a2: 'MEDIUM', a3: 'MEDIUM', a4: 'LARGE', a5: 'LARGE' }
+	],
+	SCARED: [
+		{ a0: 'LARGE', a1: 'LARGE', a2: 'LARGE', a3: 'LARGE', a4: 'MEDIUM', a5: 'SMALL' },
+		{ a0: 'MEDIUM', a1: 'MEDIUM', a2: 'LARGE', a3: 'LARGE', a4: 'MEDIUM', a5: 'MEDIUM' }
+	]
+}
+
+function getMax(tId) {
+	if (Object.keys(IntersectionDatabase[tId]).length > 0) {
+		let maxIntersect = Object.keys(IntersectionDatabase[tId]).reduce((a, b) =>
+			IntersectionDatabase[tId][a] > IntersectionDatabase[tId][b] ? a : b
+		)
+		return maxIntersect
+	}
+	return 0
+}
+
+function textify(point) {
+	let TEXTS = {
+		μ0: 'SMALL',
+		μ1: 'MEDIUM',
+		μ2: 'LARGE'
+	}
+	return TEXTS[point]
+}
+
+function checkEmotion() {
+	let convertedRuleBase = []
+	Object.keys(rulebase).forEach((key) => {
+		rulebase[key].forEach((obj) => {
+			convertedRuleBase.push({ emotion: key, ...obj })
+		})
+	})
+
+	let now = getCurrentFuzzyCluster()
+
+	convertedRuleBase.forEach((old) => {
+		if (
+			old.a0 === now.a0 &&
+			old.a1 === now.a1 &&
+			old.a2 === now.a2 &&
+			old.a3 === now.a3 &&
+			old.a4 === now.a4 &&
+			old.a5 === now.a5
+		) {
+			document.getElementById('emotion').innerHTML = old.emotion
+		} else {
+			document.getElementById('emotion').innerHTML += ''
+		}
+	})
+}
+
+function getCurrentFuzzyCluster() {
+	let k = {}
+	for (let i = 0; i < 6; i++) {
+		k['a' + i] = textify(getMax('A' + (i + 1)))
+	}
+	return k
+}
+
+function printEmotionCluster() {
+	console.log(JSON.stringify(getCurrentFuzzyCluster()))
 }
