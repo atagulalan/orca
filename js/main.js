@@ -60,7 +60,7 @@ function draw(result, videoEl, canvas, ctx) {
 				Math.round(scaledPoints[afterStopArr[stopArr.findIndex((e) => e === i)]].x),
 				Math.round(scaledPoints[afterStopArr[stopArr.findIndex((e) => e === i)]].y)
 			)
-			ctx.strokeStyle = '#72B01D'
+			ctx.strokeStyle = '#27FB6B'
 			ctx.stroke()
 			ctx.beginPath()
 			ctx.moveTo(Math.round(point.x), Math.round(point.y))
@@ -68,7 +68,7 @@ function draw(result, videoEl, canvas, ctx) {
 		ctx.lineTo(Math.round(point.x), Math.round(point.y))
 	})
 
-	ctx.strokeStyle = '#72B01D'
+	ctx.strokeStyle = '#27FB6B'
 	ctx.stroke()
 
 	//                       _
@@ -105,7 +105,7 @@ function draw(result, videoEl, canvas, ctx) {
 
 	eyeDots.forEach((dots) => {
 		if (dots) {
-			ctx.strokeStyle = '#72B01D'
+			ctx.strokeStyle = '#27FB6B'
 			ctx.beginPath()
 			ctx.arc(dots.x, dots.y, 8, 0, 2 * Math.PI)
 			ctx.stroke()
@@ -259,17 +259,13 @@ let rulebase = {
 		{ a0: 'SMALL', a1: 'MEDIUM', a2: 'MEDIUM', a3: 'MEDIUM', a4: 'LARGE', a5: 'LARGE' },
 		{ a0: 'SMALL', a1: 'MEDIUM', a2: 'LARGE', a3: 'LARGE', a4: 'LARGE', a5: 'LARGE' }
 	],
-	SAD: [
-		{ a0: 'MEDIUM', a1: 'MEDIUM', a2: 'LARGE', a3: 'MEDIUM', a4: 'LARGE', a5: 'MEDIUM' },
-		{ a0: 'LARGE', a1: 'MEDIUM', a2: 'LARGE', a3: 'MEDIUM', a4: 'LARGE', a5: 'MEDIUM' }
-	],
 	NEUTRAL: [
 		{ a0: 'MEDIUM', a1: 'MEDIUM', a2: 'MEDIUM', a3: 'MEDIUM', a4: 'LARGE', a5: 'LARGE' },
 		{ a0: 'MEDIUM', a1: 'SMALL', a2: 'MEDIUM', a3: 'MEDIUM', a4: 'LARGE', a5: 'LARGE' }
 	],
-	SCARED: [
-		{ a0: 'LARGE', a1: 'LARGE', a2: 'LARGE', a3: 'LARGE', a4: 'MEDIUM', a5: 'SMALL' },
-		{ a0: 'MEDIUM', a1: 'MEDIUM', a2: 'LARGE', a3: 'LARGE', a4: 'MEDIUM', a5: 'MEDIUM' }
+	SAD: [
+		{ a0: 'MEDIUM', a1: 'MEDIUM', a2: 'LARGE', a3: 'MEDIUM', a4: 'LARGE', a5: 'MEDIUM' },
+		{ a0: 'LARGE', a1: 'MEDIUM', a2: 'LARGE', a3: 'MEDIUM', a4: 'LARGE', a5: 'MEDIUM' }
 	]
 }
 
@@ -292,7 +288,7 @@ function textify(point) {
 	return TEXTS[point]
 }
 
-function checkEmotion() {
+function checkEmotion(crisp) {
 	let convertedRuleBase = []
 	Object.keys(rulebase).forEach((key) => {
 		rulebase[key].forEach((obj) => {
@@ -300,22 +296,26 @@ function checkEmotion() {
 		})
 	})
 
-	let now = getCurrentFuzzyCluster()
+	if (crisp) {
+		let now = getCurrentFuzzyCluster()
 
-	convertedRuleBase.forEach((old) => {
-		if (
-			old.a0 === now.a0 &&
-			old.a1 === now.a1 &&
-			old.a2 === now.a2 &&
-			old.a3 === now.a3 &&
-			old.a4 === now.a4 &&
-			old.a5 === now.a5
-		) {
-			document.getElementById('emotion').innerHTML = old.emotion
-		} else {
-			document.getElementById('emotion').innerHTML += ''
-		}
-	})
+		convertedRuleBase.forEach((old) => {
+			if (
+				old.a0 === now.a0 &&
+				old.a1 === now.a1 &&
+				old.a2 === now.a2 &&
+				old.a3 === now.a3 &&
+				old.a4 === now.a4 &&
+				old.a5 === now.a5
+			) {
+				document.getElementById('emotion').innerHTML = old.emotion
+			} else {
+				document.getElementById('emotion').innerHTML += ''
+			}
+		})
+	} else {
+		console.log(getCurrentDegree('A1'))
+	}
 }
 
 function getCurrentFuzzyCluster() {
@@ -324,6 +324,16 @@ function getCurrentFuzzyCluster() {
 		k['a' + i] = textify(getMax('A' + (i + 1)))
 	}
 	return k
+}
+
+function getCurrentValues(Ax) {
+	return IntersectionDatabase[Ax]
+}
+
+function getCurrentDegree(Ax) {
+	let get = (u) => (DegreeDatabase[Ax][u] ? DegreeDatabase[Ax][u] : -1)
+	let values = [get('μ0'), get('μ1'), get('μ2')]
+	return Math.max(...values)
 }
 
 function printEmotionCluster() {

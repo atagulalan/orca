@@ -1,100 +1,167 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <script src="js/face-api.js"></script>
-  <script src="js/functions.js"></script>
-  <script src="js/main.js"></script>
-  <script src="js/Chart.js"></script>
-  <script src="js/chartInit.js"></script>
-  <link rel="stylesheet" href="css/styles.css">
-</head>
-<body>
-  <div class="chartWrapper" id="chartWrapper">
-    <div class="singleChartWrapper">
-      <canvas id="A1" width="200" height="160" style="display: block;"></canvas>
-      <canvas id="A1Intersection" width="230" height="160" style="display: block;margin-top:-160px;"></canvas>
-      <div id="A1Text" class="text"></div>
-    </div>
-    <div class="singleChartWrapper">
-      <canvas id="A2" width="200" height="160" style="display: block;"></canvas>
-      <canvas id="A2Intersection" width="230" height="160" style="display: block;margin-top:-160px;"></canvas>
-      <div id="A2Text" class="text"></div>
-    </div>
-    <div class="singleChartWrapper">
-      <canvas id="A3" width="200" height="160" style="display: block;"></canvas>
-      <canvas id="A3Intersection" width="230" height="160" style="display: block;margin-top:-160px;"></canvas>
-      <div id="A3Text" class="text"></div>
-    </div>
-    <div class="singleChartWrapper">
-      <canvas id="A4" width="200" height="160" style="display: block;"></canvas>
-      <canvas id="A4Intersection" width="230" height="160" style="display: block;margin-top:-160px;"></canvas>
-      <div id="A4Text" class="text"></div>
-    </div>
-    <div class="singleChartWrapper">
-      <canvas id="A5" width="200" height="160" style="display: block;"></canvas>
-      <canvas id="A5Intersection" width="230" height="160" style="display: block;margin-top:-160px;"></canvas>
-      <div id="A5Text" class="text"></div>
-    </div>
-    <div class="singleChartWrapper">
-      <canvas id="A6" width="200" height="160" style="display: block;"></canvas>
-      <canvas id="A6Intersection" width="230" height="160" style="display: block;margin-top:-160px;"></canvas>
-      <div id="A6Text" class="text"></div>
-    </div>
-  </div>
-  <video onloadedmetadata="onPlay(this)" id="inputVideo" autoplay muted playsinline></video>
-  <div id="center">
-    <canvas id="overlay" width="480" height="480" />
-  </div>
-  <div id="emotion" onClick="printEmotionCluster()"></div>
-</body>
+	<head>
+		<script src="js/face-api.js"></script>
+		<script src="js/functions.js"></script>
+		<script src="js/main.js"></script>
+		<script src="js/Chart.js"></script>
+		<script src="js/chartInit.js"></script>
+		<link rel="stylesheet" href="css/styles.css" />
+	</head>
+	<body>
+		<i id="loading"></i>
+		<div id="inputWrapper">
+			<div class="singleChartWrapper">
+				<canvas id="A1" width="200" height="160" style="display: block;"></canvas>
+				<canvas id="A1Intersection" width="230" height="160" style="display: block;margin-top:-160px;"></canvas>
+				<div id="A1Text" class="text"></div>
+			</div>
+			<div class="singleChartWrapper">
+				<canvas id="A2" width="200" height="160" style="display: block;"></canvas>
+				<canvas id="A2Intersection" width="230" height="160" style="display: block;margin-top:-160px;"></canvas>
+				<div id="A2Text" class="text"></div>
+			</div>
+			<div class="singleChartWrapper">
+				<canvas id="A3" width="200" height="160" style="display: block;"></canvas>
+				<canvas id="A3Intersection" width="230" height="160" style="display: block;margin-top:-160px;"></canvas>
+				<div id="A3Text" class="text"></div>
+			</div>
+			<div class="singleChartWrapper">
+				<canvas id="A4" width="200" height="160" style="display: block;"></canvas>
+				<canvas id="A4Intersection" width="230" height="160" style="display: block;margin-top:-160px;"></canvas>
+				<div id="A4Text" class="text"></div>
+			</div>
+			<div class="singleChartWrapper">
+				<canvas id="A5" width="200" height="160" style="display: block;"></canvas>
+				<canvas id="A5Intersection" width="230" height="160" style="display: block;margin-top:-160px;"></canvas>
+				<div id="A5Text" class="text"></div>
+			</div>
+			<div class="singleChartWrapper">
+				<canvas id="A6" width="200" height="160" style="display: block;"></canvas>
+				<canvas id="A6Intersection" width="230" height="160" style="display: block;margin-top:-160px;"></canvas>
+				<div id="A6Text" class="text"></div>
+			</div>
+		</div>
+		<video onloadedmetadata="onPlay(this)" id="inputVideo" autoplay muted playsinline></video>
+		<div id="center">
+			<canvas id="overlay" width="480" height="480" />
+		</div>
+		<div id="emotion" onClick="printEmotionCluster()"></div>
+		<div id="outputWrapper">
+			<div class="singleChartWrapper">
+				<canvas id="O1" width="270" height="160" style="display: block;"></canvas>
+			</div>
+		</div>
 
-  <script>
-    const videoEl = document.getElementById('inputVideo')
-    const options = new faceapi.TinyFaceDetectorOptions({ inputSize: 256, scoreThreshold: 0 })
-    const canvas = document.getElementById('overlay')
-    const ctx = canvas.getContext('2d') 
-    let charts = [[38,136],[128,152],[90,148],[138,150],[70,156],[54,128]].map((i, idx) => {
-      let min = i[0];
-      let max = i[1];
-      return createChart(`A${idx+1}`, `A${i}Intersection`, `A${idx+1}`, () => {
-        return [trapmf([0, 0, min, ((max+min)/2)]), trimf([min, (min+max)/2, max]), trapmf([(max+min)/2, max, 180, 180])]
-      })
-    })
+		<script>
+			const videoEl = document.getElementById('inputVideo')
+			const options = new faceapi.TinyFaceDetectorOptions({ inputSize: 256, scoreThreshold: 0 })
+			const canvas = document.getElementById('overlay')
+			const ctx = canvas.getContext('2d')
+			ctx.translate(0.5, 0.5)
+			ctx.lineWidth = 1.5
 
-    async function onPlay() {
-      if(videoEl.paused || videoEl.ended || !(!!faceapi.nets.tinyFaceDetector.params))
-        return setTimeout(() => onPlay())
+			let inputCharts = [
+				[38, 136],
+				[128, 152],
+				[90, 148],
+				[138, 150],
+				[70, 156],
+				[54, 128]
+			].map((i, idx) => {
+				let min = i[0]
+				let max = i[1]
+				return createChart(
+					`A${idx + 1}`,
+					`A${i}Intersection`,
+					`A${idx + 1}`,
+					() => {
+						return {
+							μ0: trapmf([0, 0, min, (max + min) / 2]),
+							μ1: trimf([min, (min + max) / 2, max]),
+							μ2: trapmf([(max + min) / 2, max, 180, 180])
+						}
+					},
+					[...mainColors]
+				)
+			})
 
-      const result = await faceapi.detectSingleFace(videoEl, options).withFaceLandmarks()
+			let outputChart = createChart(
+				`O1`,
+				null,
+				`O1`,
+				() => {
+					return {
+						SAD: limitMax(trimf([0, 45, 90])),
+						NEUTRAL: trimf([45, 90, 135]),
+						HAPPY: trimf([90, 135, 180])
+					}
+				},
+				[...mainColors]
+			)
 
-      document.getElementById("chartWrapper").className = "chartWrapper active"
-      draw(result, videoEl, canvas, ctx) 
-      setTimeout(() => onPlay())
-    }
+			function changeOutputChart() {
+				// TODO
+				outputChart.myChart.data = createDatasetFromMembership(() => {
+					let [SADLIMIT, NEUTRALLIMIT, HAPPYLIMIT] = [
+						() => {
+							// Calculate rulebase
+							return 0.8
+						},
+						() => {
+							// Calculate rulebase
+							return 0.2
+						},
+						() => {
+							// Calculate rulebase
+							return 0.3
+						}
+					]
 
-    async function run() {
-      // load face detection and face landmark models
-      await faceapi.loadFaceLandmarkModel('./weights/')
+					return {
+						SAD: limitMax(trimf([0, 45, 90]), SADLIMIT()),
+						NEUTRAL: limitMax(trimf([45, 90, 135]), NEUTRALLIMIT()),
+						HAPPY: limitMax(trimf([90, 135, 180]), HAPPYLIMIT())
+					}
+				}, [...mainColors]).ordersChartData
 
-      // try to access users webcam and stream the images
-      // to the video element
-      const stream = await navigator.mediaDevices.getUserMedia({ video: {} })
-      const videoEl = document.getElementById('inputVideo')
-      videoEl.srcObject = stream
-    }
+				outputChart.myChart.update()
+			}
 
-    function ready(fn) {
-      if (document.readyState != 'loading'){
-        fn()
-      } else {
-        document.addEventListener('DOMContentLoaded', fn);
-      }
-    }
+			async function onPlay() {
+				if (videoEl.paused || videoEl.ended || !!!faceapi.nets.tinyFaceDetector.params)
+					return setTimeout(() => onPlay())
 
-    ready(()=>{
-      faceapi.nets.tinyFaceDetector.load('./weights/')
-      run()
-    })
-  </script>
-</body>
+				const result = await faceapi.detectSingleFace(videoEl, options).withFaceLandmarks()
+
+				document.getElementById('loading').className = 'done'
+				draw(result, videoEl, canvas, ctx)
+				setTimeout(() => onPlay())
+			}
+
+			async function run() {
+				// load face detection and face landmark models
+				await faceapi.loadFaceLandmarkModel('./weights/')
+
+				// try to access users webcam and stream the images
+				// to the video element
+				const stream = await navigator.mediaDevices.getUserMedia({ video: {} })
+				const videoEl = document.getElementById('inputVideo')
+				videoEl.srcObject = stream
+			}
+
+			function ready(fn) {
+				if (document.readyState != 'loading') {
+					fn()
+				} else {
+					document.addEventListener('DOMContentLoaded', fn)
+				}
+			}
+
+			ready(() => {
+				faceapi.nets.tinyFaceDetector.load('./weights/')
+				run()
+			})
+		</script>
+	</body>
 </html>

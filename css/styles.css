@@ -7,10 +7,10 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #0d0a0b;
+  background: #000;
 }
 
-.chartWrapper {
+#inputWrapper {
   height: 100vh;
   display: inline-flex;
   flex-direction: column;
@@ -22,16 +22,10 @@ body {
   top: 0;
   width: 300px;
   padding-left: 30px;
-  opacity: 0;
   color: white;
 }
 
-.singleChartWrapper {
-  width: 230px;
-  height: 160px;
-}
-
-.chartWrapper .text {
+#inputWrapper .text {
   color: white;
   font-weight: bolder;
   margin-top: -90px;
@@ -40,8 +34,24 @@ body {
   color: #999;
 }
 
-.chartWrapper.active {
-  opacity: 1;
+#outputWrapper{
+  height: 100vh;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  min-height: 960px;
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 300px;
+  padding-right: 30px;
+  color: white;
+}
+
+.singleChartWrapper {
+  width: 230px;
+  height: 160px;
 }
 
 #center {
@@ -68,10 +78,56 @@ video {
 
 #emotion{
   font-size: 32pt;
-  color: #72B01D;
+  color: #14cc60;
   background: transparent;
   border: none;
   font-family: 'Fira Code', consolas;
   position: absolute;
   margin-top: 250px;
+  cursor:default;
+}
+
+#loading{
+  display: flex;
+  overflow: hidden;
+  width:100vw;
+  height:100vh;
+  background:black;
+  position:fixed;
+  left:0;
+  top:0;
+  transition:0.3s opacity;
+  z-index:8;
+}
+
+#loading::before {
+  content:'';
+  margin: auto;
+  animation: rotation 1s infinite linear;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 50%;
+  border-top-color: rgba(255, 255, 255, 0.7);
+  height: 4em;
+  width: 4em;
+}
+
+#loading.done{
+  opacity:0;
+  pointer-events:none;
+}
+
+@keyframes rotation {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+#overlay{
+  transform: rotateY(180deg);
+  image-rendering: optimizeSpeed;             /* Older versions of FF          */
+  image-rendering: -moz-crisp-edges;          /* FF 6.0+                       */
+  image-rendering: -webkit-optimize-contrast; /* Safari                        */
+  image-rendering: -o-crisp-edges;            /* OS X & Windows Opera (12.02+) */
+  image-rendering: pixelated;                 /* Awesome future-browsers       */
+  -ms-interpolation-mode: nearest-neighbor;   /* IE                            */
 }

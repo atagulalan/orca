@@ -1,23 +1,4 @@
-var colors = [
-	'#02a202',
-	'#f7e201',
-	'#f71745',
-	'#02a202',
-	'#f7e201',
-	'#f71745',
-	'#02a202',
-	'#f7e201',
-	'#f71745',
-	'#02a202',
-	'#f7e201',
-	'#f71745',
-	'#02a202',
-	'#f7e201',
-	'#f71745',
-	'#02a202',
-	'#f7e201',
-	'#f71745'
-]
+var mainColors = ['#036D19', '#14CC60', '#27FB6B']
 
 var xPrecision = 180
 
@@ -26,12 +7,28 @@ Chart.defaults.global.defaultFontFamily = 'Fira Code'
 Chart.defaults.global.defaultFontSize = 11
 Chart.defaults.global.defaultFontStyle = 'normal'
 
-function trimf(arr) {
-	let mx = new Array(xPrecision).fill(0)
-	for (var i = arr[0] + 1; i <= arr[1]; i++) {
+function limitMax(arr, max) {
+	return arr.map((e) => (e > max ? max : e))
+}
+
+function trimf(arr, limits) {
+	let mx, minLimit, middleLimit, maxLimit
+	if (limits) {
+		mx = []
+		minLimit = limits[0] - 1
+		middleLimit = arr[1]
+		maxLimit = limits[1] + 1
+	} else {
+		mx = new Array(xPrecision).fill(0)
+		minLimit = arr[0]
+		middleLimit = arr[1]
+		maxLimit = arr[2]
+	}
+
+	for (var i = minLimit + 1; i <= middleLimit; i++) {
 		mx[i] = (i - arr[0]) * (1 / (arr[1] - arr[0]))
 	}
-	for (var i = arr[2] - 1; i > arr[1]; i--) {
+	for (var i = maxLimit - 1; i > middleLimit; i--) {
 		mx[i] = (i - arr[2]) * (1 / (arr[1] - arr[2]))
 	}
 	return mx
@@ -39,6 +36,7 @@ function trimf(arr) {
 
 function trapmf(arr) {
 	let mx = new Array(xPrecision).fill(0)
+
 	if (arr[0] === arr[1]) {
 		mx[0] = 1
 	} else {
@@ -95,16 +93,21 @@ function checkLineIntersection(runIndex, lineStartX, lineStartY, lineEndX, lineE
 }
 
 function convertArrayToObject(array) {
-	const initialValue = {}
-	return array.reduce((obj, item, idx) => {
-		return {
-			...obj,
-			['μ' + idx]: item
-		}
-	}, initialValue)
+	if (Array.isArray(array)) {
+		const initialValue = {}
+		return array.reduce((obj, item, idx) => {
+			return {
+				...obj,
+				['μ' + idx]: item
+			}
+		}, initialValue)
+	} else {
+		return array
+	}
 }
 
 let IntersectionDatabase = {}
+let DegreeDatabase = {}
 
 function drawIntersection(runIndex, tId, MFS, ordersChartData, chartInstance) {
 	var canvas = document.getElementById(tId + 'Intersection')
@@ -112,6 +115,7 @@ function drawIntersection(runIndex, tId, MFS, ordersChartData, chartInstance) {
 	context.clearRect(0, 0, canvas.width, canvas.height)
 
 	IntersectionDatabase[tId] = {}
+	DegreeDatabase[tId] = {}
 	Object.keys(MFS).forEach(function(k, i) {
 		var intersects = findIntersects(runIndex, MFS[k])
 
@@ -129,7 +133,7 @@ function drawIntersection(runIndex, tId, MFS, ordersChartData, chartInstance) {
 			context.arc(
 				result.x * xScale + zeroPointX,
 				Y.end - Y.start - result.y * yScale - (Y.end - Y.start - zeroPointY),
-				5,
+				8,
 				0,
 				2 * Math.PI,
 				true
@@ -144,20 +148,19 @@ function drawIntersection(runIndex, tId, MFS, ordersChartData, chartInstance) {
 				2 + (Y.end - Y.start) - result.y * yScale - (Y.end - Y.start - zeroPointY)
 			)
 			IntersectionDatabase[tId][k] = parseFloat(result.y).toPrecision(4)
+			DegreeDatabase[tId][k] = parseFloat(result.x).toPrecision(4)
 		})
 	})
 
 	document.getElementById(tId + 'Text').innerHTML = textify(getMax(tId))
 }
 
-function createChart(cId, iId, title, runMemberships) {
-	// Definning X
+function createDatasetFromMembership(runMemberships, colors) {
+	var MFS = convertArrayToObject(runMemberships())
 	var ordersChartData = {
 		labels: Array.from(Array(xPrecision).keys()),
 		datasets: []
 	}
-	var MFS = convertArrayToObject(runMemberships())
-
 	Object.keys(MFS).forEach(function(key) {
 		color = colors.shift()
 		ordersChartData.datasets.push({
@@ -172,7 +175,11 @@ function createChart(cId, iId, title, runMemberships) {
 			pointRadius: 0
 		})
 	})
+	return { ordersChartData, MFS }
+}
 
+function createChart(cId, iId, title, runMemberships, colors) {
+	var { ordersChartData, MFS } = createDatasetFromMembership(runMemberships, colors)
 	var ctx = document.getElementById(cId).getContext('2d')
 
 	var myChart = new Chart(ctx, {
@@ -206,6 +213,11 @@ function createChart(cId, iId, title, runMemberships) {
 							display: true,
 							drawBorder: false,
 							drawOnChartArea: false
+						},
+						ticks: {
+							suggestedMax: 1,
+							suggestedMin: 0,
+							beginAtZero: true
 						}
 					}
 				]
@@ -231,5 +243,5 @@ function createChart(cId, iId, title, runMemberships) {
 }
 
 function pinPoint(i, x) {
-	drawIntersection(x, `A${i}`, charts[i - 1].MFS, charts[i - 1].ordersChartData, charts[i - 1].myChart)
+	drawIntersection(x, `A${i}`, inputCharts[i - 1].MFS, inputCharts[i - 1].ordersChartData, inputCharts[i - 1].myChart)
 }
