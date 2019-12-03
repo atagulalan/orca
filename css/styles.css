@@ -85,6 +85,8 @@ video {
   position: absolute;
   margin-top: 250px;
   cursor:default;
+  text-align:center;
+  width:300px;
 }
 
 #loading{

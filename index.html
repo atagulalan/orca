@@ -49,7 +49,7 @@
 		<div id="emotion" onClick="printEmotionCluster()"></div>
 		<div id="outputWrapper">
 			<div class="singleChartWrapper">
-				<canvas id="O1" width="270" height="160" style="display: block;"></canvas>
+				<canvas id="O1" width="300" height="160" style="display: block;"></canvas>
 			</div>
 		</div>
 
@@ -89,44 +89,15 @@
 			let outputChart = createChart(
 				`O1`,
 				null,
-				`O1`,
-				() => {
-					return {
-						SAD: limitMax(trimf([0, 45, 90])),
-						NEUTRAL: trimf([45, 90, 135]),
-						HAPPY: trimf([90, 135, 180])
-					}
-				},
+				`EMOTION`,
+				() => ({
+					SAD: [],
+					NEUTRAL: [],
+					HAPPY: [],
+					SURPRISED: []
+				}),
 				[...mainColors]
 			)
-
-			function changeOutputChart() {
-				// TODO
-				outputChart.myChart.data = createDatasetFromMembership(() => {
-					let [SADLIMIT, NEUTRALLIMIT, HAPPYLIMIT] = [
-						() => {
-							// Calculate rulebase
-							return 0.8
-						},
-						() => {
-							// Calculate rulebase
-							return 0.2
-						},
-						() => {
-							// Calculate rulebase
-							return 0.3
-						}
-					]
-
-					return {
-						SAD: limitMax(trimf([0, 45, 90]), SADLIMIT()),
-						NEUTRAL: limitMax(trimf([45, 90, 135]), NEUTRALLIMIT()),
-						HAPPY: limitMax(trimf([90, 135, 180]), HAPPYLIMIT())
-					}
-				}, [...mainColors]).ordersChartData
-
-				outputChart.myChart.update()
-			}
 
 			async function onPlay() {
 				if (videoEl.paused || videoEl.ended || !!!faceapi.nets.tinyFaceDetector.params)

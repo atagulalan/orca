@@ -256,17 +256,56 @@ function draw(result, videoEl, canvas, ctx) {
 
 let rulebase = {
 	HAPPY: [
-		{ a0: 'SMALL', a1: 'MEDIUM', a2: 'MEDIUM', a3: 'MEDIUM', a4: 'LARGE', a5: 'LARGE' },
-		{ a0: 'SMALL', a1: 'MEDIUM', a2: 'LARGE', a3: 'LARGE', a4: 'LARGE', a5: 'LARGE' }
+		{ A1: 'SMALL', A2: 'SMALL', A3: 'MEDIUM', A4: 'MEDIUM', A5: 'LARGE', A6: 'LARGE' },
+		{ A1: 'SMALL', A2: 'MEDIUM', A3: 'MEDIUM', A4: 'MEDIUM', A5: 'LARGE', A6: 'LARGE' }
 	],
 	NEUTRAL: [
-		{ a0: 'MEDIUM', a1: 'MEDIUM', a2: 'MEDIUM', a3: 'MEDIUM', a4: 'LARGE', a5: 'LARGE' },
-		{ a0: 'MEDIUM', a1: 'SMALL', a2: 'MEDIUM', a3: 'MEDIUM', a4: 'LARGE', a5: 'LARGE' }
+		{ A1: 'MEDIUM', A2: 'MEDIUM', A3: 'MEDIUM', A4: 'MEDIUM', A5: 'LARGE', A6: 'MEDIUM' },
+		{ A1: 'MEDIUM', A2: 'MEDIUM', A3: 'MEDIUM', A4: 'MEDIUM', A5: 'LARGE', A6: 'LARGE' }
 	],
 	SAD: [
-		{ a0: 'MEDIUM', a1: 'MEDIUM', a2: 'LARGE', a3: 'MEDIUM', a4: 'LARGE', a5: 'MEDIUM' },
-		{ a0: 'LARGE', a1: 'MEDIUM', a2: 'LARGE', a3: 'MEDIUM', a4: 'LARGE', a5: 'MEDIUM' }
+		{ A1: 'MEDIUM', A2: 'MEDIUM', A3: 'LARGE', A4: 'MEDIUM', A5: 'LARGE', A6: 'MEDIUM' },
+		{ A1: 'MEDIUM', A2: 'MEDIUM', A3: 'LARGE', A4: 'LARGE', A5: 'LARGE', A6: 'MEDIUM' }
+	],
+	SURPRISED: [
+		{ A1: 'LARGE', A2: 'LARGE', A3: 'LARGE', A4: 'MEDIUM', A5: 'MEDIUM', A6: 'SMALL' },
+		{ A1: 'LARGE', A2: 'LARGE', A3: 'LARGE', A4: 'LARGE', A5: 'SMALL', A6: 'SMALL' }
 	]
+}
+
+function defuzzify() {
+	let maxData = new Array(xPrecision).fill(0)
+	let whos = new Array(xPrecision).fill('')
+	outputChart.myChart.data.datasets.forEach((el) => {
+		el.data.forEach((val, i) => {
+			if (maxData[i] < val) {
+				maxData[i] = val
+				whos[i] = el.label
+			}
+		})
+	})
+
+	// (discrete) center of gravity
+	let ns = {}
+	whos.forEach((who, idx) => {
+		if (ns[who] === undefined) {
+			ns[who] = 0
+		}
+
+		ns[who] = ns[who] + maxData[idx]
+	})
+
+	delete ns['']
+
+	let sum = 0
+	Object.values(ns).forEach((val) => {
+		sum += val
+	})
+	Object.keys(ns).forEach((key) => {
+		ns[key] = parseFloat(ns[key] / sum).toPrecision(4)
+	})
+
+	return ns
 }
 
 function getMax(tId) {
@@ -288,6 +327,50 @@ function textify(point) {
 	return TEXTS[point]
 }
 
+function muify(text) {
+	let MU = {
+		SMALL: 'μ0',
+		MEDIUM: 'μ1',
+		LARGE: 'μ2'
+	}
+	return MU[text]
+}
+
+function fie(emotion) {
+	let ruleArray = []
+
+	rulebase[emotion].forEach((rule) => {
+		Object.keys(rule).forEach((key, idx) => {
+			let value = rule[key]
+			ruleArray[idx] = IntersectionDatabase[key][muify(value)] ? IntersectionDatabase[key][muify(value)] : 0
+		})
+	})
+
+	// TODO?
+	return Math.min(...ruleArray)
+}
+
+function changeOutputChart() {
+	// TODO
+	outputChart.myChart.data = createDatasetFromMembership(() => {
+		let [SADLIMIT, NEUTRALLIMIT, HAPPYLIMIT, SURPRISEDLIMIT] = [
+			fie('SAD'),
+			fie('NEUTRAL'),
+			fie('HAPPY'),
+			fie('SURPRISED')
+		]
+
+		return {
+			SAD: limitMax(trimf([0, 45, 90]), SADLIMIT),
+			NEUTRAL: limitMax(trimf([80, 90, 100]), NEUTRALLIMIT),
+			HAPPY: limitMax(trimf([90, 135, 180]), HAPPYLIMIT),
+			SURPRISED: limitMax(trimf([30, 90, 150]), SURPRISEDLIMIT)
+		}
+	}, [...mainColors]).ordersChartData
+
+	outputChart.myChart.update()
+}
+
 function checkEmotion(crisp) {
 	let convertedRuleBase = []
 	Object.keys(rulebase).forEach((key) => {
@@ -298,15 +381,14 @@ function checkEmotion(crisp) {
 
 	if (crisp) {
 		let now = getCurrentFuzzyCluster()
-
 		convertedRuleBase.forEach((old) => {
 			if (
-				old.a0 === now.a0 &&
-				old.a1 === now.a1 &&
-				old.a2 === now.a2 &&
-				old.a3 === now.a3 &&
-				old.a4 === now.a4 &&
-				old.a5 === now.a5
+				old.A1 === now.A1 &&
+				old.A2 === now.A2 &&
+				old.A3 === now.A3 &&
+				old.A4 === now.A4 &&
+				old.A5 === now.A5 &&
+				old.A6 === now.A6
 			) {
 				document.getElementById('emotion').innerHTML = old.emotion
 			} else {
@@ -314,14 +396,19 @@ function checkEmotion(crisp) {
 			}
 		})
 	} else {
-		console.log(getCurrentDegree('A1'))
+		changeOutputChart()
+		let percentages = defuzzify()
+		if (Object.keys(percentages).length) {
+			let winner = Object.keys(percentages).reduce((a, b) => (percentages[a] > percentages[b] ? a : b))
+			document.getElementById('emotion').innerText = `${winner}\n${parseFloat(percentages[winner]).toFixed(2)}`
+		}
 	}
 }
 
 function getCurrentFuzzyCluster() {
 	let k = {}
 	for (let i = 0; i < 6; i++) {
-		k['a' + i] = textify(getMax('A' + (i + 1)))
+		k['A' + (i + 1)] = textify(getMax('A' + (i + 1)))
 	}
 	return k
 }

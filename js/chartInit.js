@@ -1,4 +1,4 @@
-var mainColors = ['#036D19', '#14CC60', '#27FB6B']
+var mainColors = ['#036D19', '#14CC60', '#27FB6B', '#00A676']
 
 var xPrecision = 180
 
