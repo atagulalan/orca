@@ -34,7 +34,7 @@ body {
   color: #999;
 }
 
-#outputWrapper{
+#outputWrapper {
   height: 100vh;
   display: inline-flex;
   flex-direction: column;
@@ -76,34 +76,34 @@ video {
   opacity: 0;
 }
 
-#emotion{
+#emotion {
   font-size: 32pt;
   color: #14cc60;
   background: transparent;
   border: none;
-  font-family: 'Fira Code', consolas;
+  font-family: "Fira Code", consolas;
   position: absolute;
   margin-top: 250px;
-  cursor:default;
-  text-align:center;
-  width:300px;
+  cursor: default;
+  text-align: center;
+  width: 300px;
 }
 
-#loading{
+#loading {
   display: flex;
   overflow: hidden;
-  width:100vw;
-  height:100vh;
-  background:black;
-  position:fixed;
-  left:0;
-  top:0;
-  transition:0.3s opacity;
-  z-index:8;
+  width: 100vw;
+  height: 100vh;
+  background: black;
+  position: fixed;
+  left: 0;
+  top: 0;
+  transition: 0.3s opacity;
+  z-index: 8;
 }
 
 #loading::before {
-  content:'';
+  content: "";
   margin: auto;
   animation: rotation 1s infinite linear;
   border: 1px solid rgba(255, 255, 255, 0.15);
@@ -113,9 +113,9 @@ video {
   width: 4em;
 }
 
-#loading.done{
-  opacity:0;
-  pointer-events:none;
+#loading.done {
+  opacity: 0;
+  pointer-events: none;
 }
 
 @keyframes rotation {
@@ -124,12 +124,38 @@ video {
   }
 }
 
-#overlay{
+#overlay {
   transform: rotateY(180deg);
-  image-rendering: optimizeSpeed;             /* Older versions of FF          */
-  image-rendering: -moz-crisp-edges;          /* FF 6.0+                       */
+  image-rendering: optimizeSpeed; /* Older versions of FF          */
+  image-rendering: -moz-crisp-edges; /* FF 6.0+                       */
   image-rendering: -webkit-optimize-contrast; /* Safari                        */
-  image-rendering: -o-crisp-edges;            /* OS X & Windows Opera (12.02+) */
-  image-rendering: pixelated;                 /* Awesome future-browsers       */
-  -ms-interpolation-mode: nearest-neighbor;   /* IE                            */
+  image-rendering: -o-crisp-edges; /* OS X & Windows Opera (12.02+) */
+  image-rendering: pixelated; /* Awesome future-browsers       */
+  -ms-interpolation-mode: nearest-neighbor; /* IE                            */
+}
+
+/* RULEBASE.HTML */
+
+#rulebase-wrapper {
+  overflow-y: scroll;
+  color: #14cc60;
+  font-family: "Fira Code", consolas;
+  height: 100%;
+  text-align: center;
+}
+
+#rulebase-title {
+  font-size: 32pt;
+  margin-top: 15%;
+}
+
+td {
+  font-size: 18pt;
+  border: #14cc60 2px solid;
+  padding: 20px;
+  text-align: center;
+}
+
+#rulebase-diagram {
+  padding-bottom: 10%;
 }

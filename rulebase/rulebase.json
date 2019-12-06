@@ -1,0 +1,85 @@
+{
+  "HAPPY": [
+    {
+      "Image": "buraya",
+      "A1": "SMALL",
+      "A2": "SMALL",
+      "A3": "MEDIUM",
+      "A4": "MEDIUM",
+      "A5": "LARGE",
+      "A6": "LARGE"
+    },
+    {
+      "Image": "rulebasein",
+      "A1": "SMALL",
+      "A2": "MEDIUM",
+      "A3": "MEDIUM",
+      "A4": "MEDIUM",
+      "A5": "LARGE",
+      "A6": "LARGE"
+    }
+  ],
+
+  "NEUTRAL": [
+    {
+      "Image": "baz aldigi",
+      "A1": "MEDIUM",
+      "A2": "MEDIUM",
+      "A3": "MEDIUM",
+      "A4": "MEDIUM",
+      "A5": "LARGE",
+      "A6": "MEDIUM"
+    },
+    {
+      "Image": "gorselleri",
+      "A1": "MEDIUM",
+      "A2": "MEDIUM",
+      "A3": "MEDIUM",
+      "A4": "MEDIUM",
+      "A5": "LARGE",
+      "A6": "LARGE"
+    }
+  ],
+
+  "SAD": [
+    {
+      "Image": "koyabiliriz",
+      "A1": "MEDIUM",
+      "A2": "MEDIUM",
+      "A3": "LARGE",
+      "A4": "MEDIUM",
+      "A5": "LARGE",
+      "A6": "MEDIUM"
+    },
+    {
+      "Image": "ya da bu",
+      "A1": "MEDIUM",
+      "A2": "MEDIUM",
+      "A3": "LARGE",
+      "A4": "LARGE",
+      "A5": "LARGE",
+      "A6": "MEDIUM"
+    }
+  ],
+
+  "SUPRISED": [
+    {
+      "Image": "sutunu silebiliriz",
+      "A1": "LARGE",
+      "A2": "LARGE",
+      "A3": "LARGE",
+      "A4": "MEDIUM",
+      "A5": "MEDIUM",
+      "A6": "SMALL"
+    },
+    {
+      "Image": "bakariz",
+      "A1": "LARGE",
+      "A2": "LARGE",
+      "A3": "LARGE",
+      "A4": "LARGE",
+      "A5": "SMALL",
+      "A6": "SMALL"
+    }
+  ]
+}
