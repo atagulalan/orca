@@ -346,12 +346,14 @@ function fie(emotion) {
 		})
 	})
 
-	// TODO?
-	return Math.min(...ruleArray)
+	if (ruleArray.length > 0) {
+		// TODO?
+		return Math.min(...ruleArray)
+	}
+	return 0
 }
 
 function changeOutputChart() {
-	// TODO
 	outputChart.myChart.data = createDatasetFromMembership(() => {
 		let [SADLIMIT, NEUTRALLIMIT, HAPPYLIMIT, SURPRISEDLIMIT] = [
 			fie('SAD'),
@@ -362,7 +364,7 @@ function changeOutputChart() {
 
 		return {
 			SAD: limitMax(trimf([0, 45, 90]), SADLIMIT),
-			NEUTRAL: limitMax(trimf([80, 90, 100]), NEUTRALLIMIT),
+			NEUTRAL: limitMax(trimf([70, 90, 110]), NEUTRALLIMIT),
 			HAPPY: limitMax(trimf([90, 135, 180]), HAPPYLIMIT),
 			SURPRISED: limitMax(trimf([30, 90, 150]), SURPRISEDLIMIT)
 		}
@@ -425,4 +427,197 @@ function getCurrentDegree(Ax) {
 
 function printEmotionCluster() {
 	console.log(JSON.stringify(getCurrentFuzzyCluster()))
+}
+
+let boundaries = { A1: [38, 136], A2: [128, 152], A3: [90, 148], A4: [138, 150], A5: [70, 156], A6: [54, 128] }
+let boundaryInterval
+
+function startLimitBoundaries() {
+	boundaries = {
+		A1: [180, 0],
+		A2: [180, 0],
+		A3: [180, 0],
+		A4: [180, 0],
+		A5: [180, 0],
+		A6: [180, 0]
+	}
+	boundaryInterval = setInterval(function() {
+		for (let i = 1; i <= 6; i++) {
+			let curVal = getCurrentDegree('A' + i)
+			console.log(curVal)
+			if (boundaries['A' + i][0] > curVal) {
+				boundaries['A' + i][0] = curVal
+			}
+			if (boundaries['A' + i][1] < curVal) {
+				boundaries['A' + i][1] = curVal
+			}
+		}
+	}, 10)
+}
+
+function stopLimitBoundaries() {
+	clearInterval(boundaryInterval)
+	//round up numbers
+	for (let i = 1; i <= 6; i++) {
+		boundaries['A' + i][0] = Math.floor(boundaries['A' + i][0] / 2) * 2
+		boundaries['A' + i][1] = Math.ceil(boundaries['A' + i][1] / 2) * 2
+	}
+	setBoundaries()
+}
+
+function setBoundaries() {
+	inputCharts.forEach((chart, idx) => {
+		let membership = () => {
+			let [min, max] = [boundaries[chart.cId][0], boundaries[chart.cId][1]]
+			let [SMALL, MEDIUM, LARGE] = [
+				trapmf([0, 0, min, (max + min) / 2]),
+				trimf([min, (min + max) / 2, max]),
+				trapmf([(max + min) / 2, max, 180, 180])
+			]
+
+			return {
+				μ0: SMALL,
+				μ1: MEDIUM,
+				μ2: LARGE
+			}
+		}
+
+		chart.myChart.data = createDatasetFromMembership(membership, [...mainColors]).ordersChartData
+		chart.myChart.update()
+		inputCharts[idx].MFS = convertArrayToObject(membership())
+	})
+}
+
+function pushIfNotExists(arr, obj) {
+	let g = (o, t) => o[t]['text']
+	let c = (o1, o2, over) => g(o1, over) === g(o2, over)
+	let maxBy = (over, o1, o2) => (o1[over].by > o2[over].by ? o1[over].by : o2[over].by)
+	let existant
+	arr.some((el, idx) => {
+		if (
+			c(el, obj, 'A1') &&
+			c(el, obj, 'A2') &&
+			c(el, obj, 'A3') &&
+			c(el, obj, 'A4') &&
+			c(el, obj, 'A5') &&
+			c(el, obj, 'A6')
+		) {
+			existant = [idx, el]
+			return true
+		}
+	})
+	if (existant) {
+		// en yüksek kestiği değeri döndür
+		existant[1] = {
+			A1: { text: g(existant[1], 'A1'), by: maxBy('A1', existant[1], obj) },
+			A2: { text: g(existant[1], 'A2'), by: maxBy('A2', existant[1], obj) },
+			A3: { text: g(existant[1], 'A3'), by: maxBy('A3', existant[1], obj) },
+			A4: { text: g(existant[1], 'A4'), by: maxBy('A4', existant[1], obj) },
+			A5: { text: g(existant[1], 'A5'), by: maxBy('A5', existant[1], obj) },
+			A6: { text: g(existant[1], 'A6'), by: maxBy('A6', existant[1], obj) }
+		}
+		return ['update', ...existant]
+	} else {
+		return ['add', obj]
+	}
+}
+
+let learnedEmotionRulebase = {}
+let learnInterval
+
+function startLearningEmotion(emotion) {
+	if (learnedEmotionRulebase[emotion] === undefined) {
+		learnedEmotionRulebase[emotion] = []
+	}
+	learnInterval = setInterval(
+		function() {
+			let cfc = getCurrentFuzzyCluster()
+			for (let i = 1; i <= 6; i++) {
+				cfc['A' + i] = { text: cfc['A' + i], by: getCurrentValues('A' + i)[getMax('A' + i)] }
+			}
+			let decision = pushIfNotExists(learnedEmotionRulebase[emotion], cfc)
+			if (decision[0] === 'add') {
+				learnedEmotionRulebase[emotion].push(decision[1])
+			} else if (decision[0] === 'update') {
+				learnedEmotionRulebase[emotion][decision[1]] = decision[2]
+			}
+		}.bind(emotion),
+		10
+	)
+}
+
+function stopLearningEmotion() {
+	clearInterval(learnInterval)
+}
+
+function saveLearnedEmotion() {
+	// compare emotions, if any of them has duplicate, compare by values and
+	// calculate differences. If differences sum is negative, remove a's rule,
+	// if sum is positive, remove b's rule. By doing that, you achieve probable
+	// outcome by values.
+
+	let unbiasedRulebase = []
+
+	Object.keys(learnedEmotionRulebase).forEach((key) => {
+		let rules = learnedEmotionRulebase[key]
+		rules.forEach((values) => {
+			values['emotion'] = key
+
+			let found
+			unbiasedRulebase.some((rule, idx) => {
+				if (
+					values['A1'] === rule['A1'] &&
+					values['A2'] === rule['A2'] &&
+					values['A3'] === rule['A3'] &&
+					values['A4'] === rule['A4'] &&
+					values['A5'] === rule['A5'] &&
+					values['A6'] === rule['A6']
+				) {
+					console.log(values)
+					found = { rule, idx }
+					return true
+				}
+			})
+
+			if (found) {
+				let average = 0
+				console.log(found)
+				average += found.rule['A1'].by - values['A1']
+				average += found.rule['A2'].by - values['A2']
+				average += found.rule['A3'].by - values['A3']
+				average += found.rule['A4'].by - values['A4']
+				average += found.rule['A5'].by - values['A5']
+				average += found.rule['A6'].by - values['A6']
+				// TODO CONTROL
+				if (average > 0) {
+					learnedEmotionRulebase[found.idx] = values
+				}
+			} else {
+				unbiasedRulebase.push({ ...values, emotion: key })
+			}
+		})
+	})
+
+	let newRulebase = {
+		SAD: [],
+		NEUTRAL: [],
+		HAPPY: [],
+		SURPRISED: []
+	}
+
+	unbiasedRulebase.forEach((el) => {
+		if (newRulebase[el.emotion] === undefined) {
+			newRulebase[el.emotion] = []
+		}
+		newRulebase[el.emotion].push({
+			A1: el.A1.text,
+			A2: el.A2.text,
+			A3: el.A3.text,
+			A4: el.A4.text,
+			A5: el.A5.text,
+			A6: el.A6.text
+		})
+	})
+
+	rulebase = newRulebase
 }

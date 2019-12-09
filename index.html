@@ -41,12 +41,22 @@
 				<canvas id="A6Intersection" width="230" height="160" style="display: block;margin-top:-160px;"></canvas>
 				<div id="A6Text" class="text"></div>
 			</div>
+			<button onClick="startLimitBoundaries()">Start Limit Input Boundaries</button>
+			<button onClick="stopLimitBoundaries()">Stop Limit Input Boundaries</button>
 		</div>
 		<video onloadedmetadata="onPlay(this)" id="inputVideo" autoplay muted playsinline></video>
 		<div id="center">
 			<canvas id="overlay" width="480" height="480" />
 		</div>
 		<div id="emotion" onClick="printEmotionCluster()"></div>
+		<div class="buttons">
+			<button onClick="startLearningEmotion('HAPPY')">HAPPY</button>
+			<button onClick="startLearningEmotion('SAD')">SAD</button>
+			<button onClick="startLearningEmotion('NEUTRAL')">NEUTRAL</button>
+			<button onClick="startLearningEmotion('SURPRISED')">SURPRISED</button>
+			<button onClick="stopLearningEmotion()">STOP</button>
+			<button onClick="saveLearnedEmotion()">SAVE</button>
+		</div>
 		<div id="outputWrapper">
 			<div class="singleChartWrapper">
 				<canvas id="O1" width="300" height="160" style="display: block;"></canvas>
@@ -61,14 +71,7 @@
 			ctx.translate(0.5, 0.5)
 			ctx.lineWidth = 1.5
 
-			let inputCharts = [
-				[38, 136],
-				[128, 152],
-				[90, 148],
-				[138, 150],
-				[70, 156],
-				[54, 128]
-			].map((i, idx) => {
+			let inputCharts = Object.values(boundaries).map((i, idx) => {
 				let min = i[0]
 				let max = i[1]
 				return createChart(
