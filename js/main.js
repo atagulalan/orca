@@ -273,41 +273,6 @@ let rulebase = {
 	]
 }
 
-function defuzzify() {
-	let maxData = new Array(xPrecision).fill(0)
-	let whos = new Array(xPrecision).fill('')
-	outputChart.myChart.data.datasets.forEach((el) => {
-		el.data.forEach((val, i) => {
-			if (maxData[i] < val) {
-				maxData[i] = val
-				whos[i] = el.label
-			}
-		})
-	})
-
-	// (discrete) center of gravity
-	let ns = {}
-	whos.forEach((who, idx) => {
-		if (ns[who] === undefined) {
-			ns[who] = 0
-		}
-
-		ns[who] = ns[who] + maxData[idx]
-	})
-
-	delete ns['']
-
-	let sum = 0
-	Object.values(ns).forEach((val) => {
-		sum += val
-	})
-	Object.keys(ns).forEach((key) => {
-		ns[key] = parseFloat(ns[key] / sum).toPrecision(4)
-	})
-
-	return ns
-}
-
 function getMax(tId) {
 	if (Object.keys(IntersectionDatabase[tId]).length > 0) {
 		let maxIntersect = Object.keys(IntersectionDatabase[tId]).reduce((a, b) =>
@@ -373,6 +338,41 @@ function changeOutputChart() {
 	outputChart.myChart.update()
 }
 
+function defuzzify() {
+	let maxData = new Array(xPrecision).fill(0)
+	let whos = new Array(xPrecision).fill('')
+	outputChart.myChart.data.datasets.forEach((el) => {
+		el.data.forEach((val, i) => {
+			if (maxData[i] < val) {
+				maxData[i] = val
+				whos[i] = el.label
+			}
+		})
+	})
+
+	// (discrete) center of gravity
+	let ns = {}
+	whos.forEach((who, idx) => {
+		if (ns[who] === undefined) {
+			ns[who] = 0
+		}
+
+		ns[who] = ns[who] + maxData[idx]
+	})
+
+	delete ns['']
+
+	let sum = 0
+	Object.values(ns).forEach((val) => {
+		sum += val
+	})
+	Object.keys(ns).forEach((key) => {
+		ns[key] = parseFloat(ns[key] / sum).toPrecision(4)
+	})
+
+	return ns
+}
+
 function checkEmotion(crisp) {
 	let convertedRuleBase = []
 	Object.keys(rulebase).forEach((key) => {
@@ -400,6 +400,7 @@ function checkEmotion(crisp) {
 	} else {
 		changeOutputChart()
 		let percentages = defuzzify()
+
 		if (Object.keys(percentages).length) {
 			let winner = Object.keys(percentages).reduce((a, b) => (percentages[a] > percentages[b] ? a : b))
 			document.getElementById('emotion').innerText = `${winner}\n${parseFloat(percentages[winner]).toFixed(2)}`
@@ -452,6 +453,7 @@ function startLimitBoundaries() {
 				boundaries['A' + i][1] = curVal
 			}
 		}
+		console.log(boundaries)
 	}, 10)
 }
 
@@ -526,9 +528,7 @@ let learnedEmotionRulebase = {}
 let learnInterval
 
 function startLearningEmotion(emotion) {
-	if (learnedEmotionRulebase[emotion] === undefined) {
-		learnedEmotionRulebase[emotion] = []
-	}
+	learnedEmotionRulebase[emotion] = []
 	learnInterval = setInterval(
 		function() {
 			let cfc = getCurrentFuzzyCluster()
@@ -589,7 +589,7 @@ function saveLearnedEmotion() {
 				average += found.rule['A5'].by - values['A5']
 				average += found.rule['A6'].by - values['A6']
 				// TODO CONTROL
-				if (average > 0) {
+				if (average < 0) {
 					learnedEmotionRulebase[found.idx] = values
 				}
 			} else {
