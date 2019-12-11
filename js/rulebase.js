@@ -1,22 +1,34 @@
 // The JS File That Reads & Loads Rulebases to Rulebase.html
-function readRuleBase() {
-  $.getJSON("rulebase/rulebase.json", function(json) {
-    // Reads and gets rulebase.json
 
-    var table = document.createElement("table");
-
-    // Draws the read rulebases
-    loadRuleBase(1, null, "Emotion", table, 1);
-    loadRuleBase(json.HAPPY.length, json.HAPPY, "HAPPY", table, 0);
-    loadRuleBase(json.NEUTRAL.length, json.NEUTRAL, "NEUTRAL", table, 0);
-    loadRuleBase(json.SAD.length, json.SAD, "SAD", table, 0);
-    loadRuleBase(json.SUPRISED.length, json.SUPRISED, "SUPRISED", table, 0);
-
-    var div = document.getElementById("rulebase-table");
-    div.appendChild(table);
-    // this will show the info it in firebug console
-  });
+function readRuleBase(file, callback) {
+  var rawFile = new XMLHttpRequest();
+  rawFile.overrideMimeType("application/json");
+  rawFile.open("GET", file, true);
+  rawFile.onreadystatechange = function() {
+    if (rawFile.readyState === 4 && rawFile.status == "200") {
+      callback(rawFile.responseText);
+    }
+  };
+  rawFile.send(null);
 }
+
+// Reads and gets rulebase.json
+readRuleBase("rulebase/rulebase.json", function(text) {
+  var json = JSON.parse(text);
+  var table = document.createElement("table");
+
+  // Draws the read rulebases
+  loadRuleBase(1, null, "Emotion", table, 1);
+  loadRuleBase(json.HAPPY.length, json.HAPPY, "HAPPY", table, 0);
+  loadRuleBase(json.NEUTRAL.length, json.NEUTRAL, "NEUTRAL", table, 0);
+  loadRuleBase(json.SAD.length, json.SAD, "SAD", table, 0);
+  loadRuleBase(json.SUPRISED.length, json.SUPRISED, "SUPRISED", table, 0);
+
+  var div = document.getElementById("rulebase-table");
+  div.appendChild(table);
+});
+
+// this will show the info it in firebug console
 
 function loadRuleBase(length, jsonEmotion, emotion, table, isTag) {
   // Draws rulebase table with values

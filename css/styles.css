@@ -134,10 +134,35 @@ video {
   -ms-interpolation-mode: nearest-neighbor; /* IE                            */
 }
 
+.buttons {
+  font-size: 32pt;
+  color: #14cc60;
+  background: transparent;
+  border: none;
+  font-family: "Fira Code", consolas;
+  position: absolute;
+  margin-top: -300px;
+  cursor: default;
+  text-align: center;
+}
+
+#inputWrapper button {
+  width: 100%;
+  margin: 4px 0 0;
+}
+
+button {
+  line-height: 30px;
+  border: 1px solid #14cc60;
+  background: transparent;
+  color: #14cc60;
+  padding: 0 10px;
+  font-family: "Fira Code", consolas;
+}
+
 /* RULEBASE.HTML */
 
 #rulebase-wrapper {
-  overflow-y: scroll;
   color: #14cc60;
   font-family: "Fira Code", consolas;
   height: 100%;
@@ -158,30 +183,4 @@ td {
 
 #rulebase-diagram {
   padding-bottom: 10%;
-}
-
-.buttons{
-  font-size: 32pt;
-  color: #14cc60;
-  background: transparent;
-  border: none;
-  font-family: "Fira Code", consolas;
-  position: absolute;
-  margin-top: -300px;
-  cursor: default;
-  text-align: center;
-}
-
-#inputWrapper button {
-  width: 100%;
-  margin: 4px 0 0;
-}
-
-button{
-  line-height: 30px;
-  border: 1px solid #14cc60;
-  background: transparent;
-  color: #14cc60;
-  padding: 0 10px;
-  font-family: "Fira Code", consolas;
 }
